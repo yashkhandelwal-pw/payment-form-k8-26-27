@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Form - K8 26-27</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Image Compression -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.umd.js"></script>
+    <!-- Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- Email Authentication Screen -->
+    <div id="authScreen" class="screen active">
+        <div class="container">
+            <div class="card">
+                <h1>Payment Form - K8 26-27</h1>
+                <div class="form-group">
+                    <label for="employeeEmail">Enter Your Email ID</label>
+                    <input type="email" id="employeeEmail" placeholder="your.email@example.com" required>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+                <button id="fetchDetailsBtn" class="btn btn-primary">Fetch Details</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Form Screen -->
+    <div id="formScreen" class="screen">
+        <div class="container">
+            <div class="card">
+                <div class="header">
+                    <h1>Payment Form</h1>
+                    <div class="user-info">
+                        <span id="loggedInEmail"></span>
+                        <button id="logoutBtn" class="btn btn-link">Logout</button>
+                    </div>
+                </div>
+
+                <form id="paymentForm">
+                    <!-- Customer Selection -->
+                    <div class="form-section">
+                        <h2>Customer Selection</h2>
+                        <div class="form-group">
+                            <label for="customerSelect">Select Customer <span class="required">*</span></label>
+                            <select id="customerSelect" required>
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                            <span class="error-message" id="customerError"></span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="form-section">
+                        <h2>Payment Details</h2>
+                        
+                        <!-- Customer Code (Read-only) -->
+                        <div class="form-group">
+                            <label for="customerCode">Customer Code</label>
+                            <input type="text" id="customerCode" readonly class="readonly">
+                        </div>
+
+                        <!-- Company Trade Name (Read-only) -->
+                        <div class="form-group">
+                            <label for="companyTradeName">Company Trade Name</label>
+                            <input type="text" id="companyTradeName" readonly class="readonly">
+                        </div>
+
+                        <!-- Customer Email ID (Read-only) -->
+                        <div class="form-group">
+                            <label for="customerEmail">Customer Email ID</label>
+                            <input type="email" id="customerEmail" readonly class="readonly">
+                        </div>
+
+                        <!-- Customer Contact Number (Read-only) -->
+                        <div class="form-group">
+                            <label for="contactNumber">Customer Contact Number</label>
+                            <input type="text" id="contactNumber" readonly class="readonly">
+                        </div>
+
+                        <!-- Mode of Payment -->
+                        <div class="form-group">
+                            <label for="modeOfPayment">Mode of Payment <span class="required">*</span></label>
+                            <select id="modeOfPayment" required>
+                                <option value="">-- Select Mode --</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Razorpay">Razorpay</option>
+                                <option value="NEFT / RTGS">NEFT / RTGS</option>
+                            </select>
+                            <span class="error-message" id="modeError"></span>
+                        </div>
+
+                        <!-- Date of Payment -->
+                        <div class="form-group">
+                            <label for="dateOfPayment">Date of Payment <span class="required">*</span></label>
+                            <input type="text" id="dateOfPayment" placeholder="Select date" required readonly>
+                            <span class="error-message" id="dateError"></span>
+                        </div>
+
+                        <!-- Payment Reference Number -->
+                        <div class="form-group">
+                            <label for="paymentRefNumber">Payment Reference Number (Cheque No./UTR No.) <span class="required">*</span></label>
+                            <input type="text" id="paymentRefNumber" placeholder="Enter reference number" required>
+                            <span class="error-message" id="refNumberError"></span>
+                        </div>
+
+                        <!-- Payment Amount -->
+                        <div class="form-group">
+                            <label for="paymentAmount">Payment Amount <span class="required">*</span></label>
+                            <input type="text" id="paymentAmount" placeholder="Enter amount" required>
+                            <span class="error-message" id="amountError"></span>
+                            <small class="help-text">Amount will be formatted in Indian currency</small>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="form-group">
+                            <label for="remarks">Remarks, If Any</label>
+                            <textarea id="remarks" rows="3" placeholder="Enter any remarks (optional)"></textarea>
+                        </div>
+
+                        <!-- Payment Confirmation Screenshot/Cheque Image -->
+                        <div class="form-group">
+                            <label for="paymentConfirmationFile">Payment Confirmation Screenshot/Cheque Image <span class="required">*</span></label>
+                            <input type="file" id="paymentConfirmationFile" accept="image/*,application/pdf" capture="environment" required>
+                            <small class="help-text">You can upload image/PDF or capture directly with camera</small>
+                            <div id="paymentConfirmationPreview" class="file-preview"></div>
+                            <span class="error-message" id="paymentFileError"></span>
+                        </div>
+
+                        <!-- Deposit Receipt Image (Conditional - Cheque only) -->
+                        <div class="form-group hidden" id="depositReceiptGroup">
+                            <label for="depositReceiptFile">Deposit Receipt Image (for Cheque only) <span class="required">*</span></label>
+                            <input type="file" id="depositReceiptFile" accept="image/*,application/pdf" capture="environment">
+                            <small class="help-text">You can upload image/PDF or capture directly with camera</small>
+                            <div id="depositReceiptPreview" class="file-preview"></div>
+                            <span class="error-message" id="depositFileError"></span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn" class="btn btn-primary btn-large">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageToast" class="toast hidden"></div>
+
+    <!-- Immediate Console Test -->
+    <script>
+        console.log('=== PAGE LOADING START ===');
+        console.log('HTML loaded, starting scripts...');
+    </script>
+    
+    <!-- Load Configuration First -->
+    <script>
+        console.log('Loading config.js...');
+    </script>
+    <script src="config.js"></script>
+    
+    <!-- Verify config loaded -->
+    <script>
+        console.log('Verifying configuration...');
+        if (typeof SUPABASE_URL === 'undefined' || typeof BACKEND_API_URL === 'undefined') {
+            console.error('❌ Configuration not loaded!');
+            console.error('SUPABASE_URL:', typeof SUPABASE_URL);
+            console.error('BACKEND_API_URL:', typeof BACKEND_API_URL);
+            alert('Configuration not loaded! Check console (F12) for details.');
+        } else {
+            console.log('✅ Configuration loaded successfully');
+            console.log('SUPABASE_URL:', SUPABASE_URL);
+            console.log('BACKEND_API_URL:', BACKEND_API_URL);
+        }
+    </script>
+    
+    <!-- Global Error Handler (Inline) -->
+    <script>
+        console.log('Setting up error handlers...');
+        
+        // Global error handler
+        window.addEventListener('error', function(event) {
+            console.error('❌ Global Error:', event.error);
+            console.error('Message:', event.message);
+            console.error('File:', event.filename);
+            console.error('Line:', event.lineno);
+            console.error('Column:', event.colno);
+            // Don't prevent default - let it show in console
+        }, true);
+        
+        // Unhandled promise rejection
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('❌ Unhandled Promise Rejection:', event.reason);
+            console.error('Reason:', event.reason);
+        });
+        
+        console.log('✅ Global error handlers installed');
+    </script>
+    
+    <!-- Load Application Script -->
+    <script>
+        console.log('Loading app.js...');
+    </script>
+    <script src="app.js"></script>
+    <script>
+        console.log('app.js script tag finished');
+    </script>
+    
+    <script>
+        console.log('=== ALL SCRIPTS LOADED ===');
+    </script>
+</body>
+</html>
+
