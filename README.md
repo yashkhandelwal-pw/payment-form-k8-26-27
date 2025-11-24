@@ -49,13 +49,11 @@ The backend will run on `http://localhost:3000`
 ### Step 2: Update Frontend Configuration
 
 1. Open `config.js`
-2. Update the backend API URL (if different from default):
+2. Verify the backend API URL is set correctly:
 
 ```javascript
 const BACKEND_API_URL = 'http://localhost:3000/api';
 ```
-
-For production, use your deployed backend URL.
 
 ### Step 3: Verify Service Account Access
 
@@ -191,10 +189,10 @@ Payment Form - K8 26-27/
 
 ## Security Notes
 
-- ⚠️ **Never commit** `config.js` with real credentials to public repositories
-- Use environment variables or a backend service for production
-- OAuth tokens are stored in memory (cleared on page refresh)
-- Consider implementing token refresh for long sessions
+- ⚠️ **Never commit** `service-account-key.json` to repositories
+- Keep your Service Account credentials secure
+- The backend API handles all Google API authentication
+- Supabase credentials in `config.js` are for read-only access
 
 ## Browser Support
 

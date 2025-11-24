@@ -240,9 +240,9 @@ After completing all steps, verify:
    - Go to Settings → Collaborators
    - Add team members
 
-2. **Set Up Deployment**:
-   - See `DEPLOYMENT.md` for deployment options
-   - Choose: Vercel, Railway, Render, or your own server
+2. **Local Development**:
+   - This application is configured for local development only
+   - See `DEPLOYMENT.md` for information about the local setup
 
 3. **Monitor Workflows**:
    - Check Actions tab regularly

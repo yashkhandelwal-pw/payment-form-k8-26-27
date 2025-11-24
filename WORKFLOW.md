@@ -222,6 +222,6 @@ A native web application (mobile & desktop compatible) for payment form submissi
 3. Create Google Sheet with proper column headers
 4. Implement the application code
 5. Test each phase independently
-6. Deploy the application
+6. Run the application locally
 
 

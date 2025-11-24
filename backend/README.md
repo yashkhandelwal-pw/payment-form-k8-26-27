@@ -13,16 +13,7 @@ npm install
 
 ### 2. Set Up Service Account
 
-**Option A: Using Environment Variable (Recommended for Production)**
-
-1. Get your Service Account JSON key file from Google Cloud Console
-2. Convert the JSON to a single-line string (or use base64 encoding)
-3. Set environment variable:
-   ```bash
-   export GOOGLE_SERVICE_ACCOUNT_JSON='{"type":"service_account","project_id":"...","private_key_id":"...","private_key":"...","client_email":"...","client_id":"...","auth_uri":"...","token_uri":"...","auth_provider_x509_cert_url":"...","client_x509_cert_url":"..."}'
-   ```
-
-**Option B: Using JSON File (For Development)**
+**Using JSON File:**
 
 1. Download your Service Account JSON key file from Google Cloud Console
 2. Rename it to `service-account-key.json`
@@ -46,14 +37,13 @@ GOOGLE_SERVICE_ACCOUNT_JSON=your-json-string-here
 
 ### 5. Start the Server
 
-**Development mode (with auto-reload):**
-```bash
-npm run dev
-```
-
-**Production mode:**
 ```bash
 npm start
+```
+
+Or with auto-reload for development:
+```bash
+npm run dev
 ```
 
 The server will start on `http://localhost:3000`
@@ -103,39 +93,13 @@ Body: {
 }
 ```
 
-## Deployment Options
-
-### Option 1: Deploy to Heroku
-
-1. Install Heroku CLI
-2. Create Heroku app: `heroku create your-app-name`
-3. Set environment variable: `heroku config:set GOOGLE_SERVICE_ACCOUNT_JSON='...'`
-4. Deploy: `git push heroku main`
-
-### Option 2: Deploy to Railway
-
-1. Connect your GitHub repository
-2. Set environment variables in Railway dashboard
-3. Deploy automatically
-
-### Option 3: Deploy to Render
-
-1. Create new Web Service
-2. Connect your repository
-3. Set environment variables
-4. Deploy
-
-### Option 4: Deploy to Vercel (Serverless Functions)
-
-See `vercel-functions/` folder for serverless function setup.
-
 ## Security Notes
 
 - ⚠️ **Never commit** `service-account-key.json` to version control
-- Use environment variables for production
-- Enable CORS only for your frontend domain
-- Consider adding rate limiting
-- Add authentication/authorization if needed
+- Keep Service Account credentials secure
+- CORS is enabled for local development
+- Consider adding rate limiting for production use
+- Add authentication/authorization if deploying publicly
 
 ## Troubleshooting
 

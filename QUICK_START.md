@@ -45,9 +45,9 @@
    ```
    Server will run on `http://localhost:3000`
 
-### 2. Update Frontend Config (Optional)
+### 2. Verify Frontend Config
 
-If backend is on a different URL, update `config.js`:
+Check that `config.js` has the correct backend URL:
 ```javascript
 const BACKEND_API_URL = 'http://localhost:3000/api';
 ```

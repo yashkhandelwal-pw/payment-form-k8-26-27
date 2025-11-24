@@ -61,14 +61,13 @@ npx http-server -p 8000
 ✅ **No User Authentication** - Users just enter email and submit  
 ✅ **More Secure** - Service Account credentials stay on server  
 ✅ **Simpler UX** - One less step for users  
-✅ **Better for Production** - Standard backend pattern  
+✅ **Local Development** - Easy to set up and use locally  
 
 ## Next Steps
 
 1. Follow `BACKEND_SETUP.md` for detailed instructions
-2. Test the complete flow
-3. Deploy backend to production (Heroku, Railway, Render, etc.)
-4. Update `BACKEND_API_URL` in `config.js` with production URL
+2. Test the complete flow locally
+3. Start using the application for payment form submissions
 
 ## Support
 

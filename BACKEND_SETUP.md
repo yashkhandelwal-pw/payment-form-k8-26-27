@@ -78,17 +78,12 @@ npm run dev
 
 The server will run on `http://localhost:3000`
 
-### Step 6: Update Frontend Config
+### Step 6: Verify Frontend Config
 
-Open `config.js` in the root folder and update:
+Open `config.js` in the root folder and verify:
 
 ```javascript
 const BACKEND_API_URL = 'http://localhost:3000/api';
-```
-
-For production, change to your deployed backend URL:
-```javascript
-const BACKEND_API_URL = 'https://your-backend-domain.com/api';
 ```
 
 ## Testing
@@ -102,69 +97,6 @@ const BACKEND_API_URL = 'https://your-backend-domain.com/api';
    - Try submitting a form
    - Check that data appears in Google Sheet
    - Check that files appear in Google Drive
-
-## Deployment
-
-### Deploy to Heroku (Free Tier Available)
-
-1. **Install Heroku CLI:**
-   ```bash
-   # Download from https://devcenter.heroku.com/articles/heroku-cli
-   ```
-
-2. **Login to Heroku:**
-   ```bash
-   heroku login
-   ```
-
-3. **Create Heroku app:**
-   ```bash
-   cd backend
-   heroku create your-app-name
-   ```
-
-4. **Set environment variable:**
-   ```bash
-   # Read your JSON file and set it
-   heroku config:set GOOGLE_SERVICE_ACCOUNT_JSON="$(cat service-account-key.json)"
-   ```
-
-5. **Deploy:**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   heroku git:remote -a your-app-name
-   git push heroku main
-   ```
-
-6. **Update frontend config:**
-   ```javascript
-   const BACKEND_API_URL = 'https://your-app-name.herokuapp.com/api';
-   ```
-
-### Deploy to Railway (Easy Alternative)
-
-1. Go to [railway.app](https://railway.app/)
-2. Sign up/login
-3. Click "New Project" → "Deploy from GitHub"
-4. Connect your repository
-5. Select the `backend` folder
-6. Add environment variable: `GOOGLE_SERVICE_ACCOUNT_JSON`
-7. Deploy automatically
-8. Get your URL and update frontend config
-
-### Deploy to Render
-
-1. Go to [render.com](https://render.com/)
-2. Create new Web Service
-3. Connect your repository
-4. Set:
-   - **Root Directory**: `backend`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-5. Add environment variable: `GOOGLE_SERVICE_ACCOUNT_JSON`
-6. Deploy
 
 ## Troubleshooting
 
@@ -200,10 +132,10 @@ const BACKEND_API_URL = 'https://your-backend-domain.com/api';
 
 ## Next Steps
 
-1. ✅ Backend is running
-2. ✅ Frontend config is updated
+1. ✅ Backend is running locally
+2. ✅ Frontend config is verified
 3. ✅ Test the complete flow
-4. ✅ Deploy to production when ready
+4. ✅ Application ready for local use
 
 Your application now works **without any user authentication** - users just enter their email and submit forms directly!
 

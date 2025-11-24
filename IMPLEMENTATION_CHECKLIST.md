@@ -182,34 +182,20 @@ Ensure your Google Sheet has these columns (in order):
 ## Security Checklist
 
 - [ ] Never expose Service Account JSON in client-side code
-- [ ] Use environment variables for sensitive data
+- [ ] Keep Service Account credentials secure in backend folder
 - [ ] Implement input sanitization
 - [ ] Validate file types and sizes
-- [ ] Use HTTPS in production
-- [ ] Implement rate limiting (if needed)
 - [ ] Secure Supabase API key (consider Row Level Security)
-
----
-
-## Deployment Checklist
-
-- [ ] Choose hosting platform (Netlify, Vercel, GitHub Pages, etc.)
-- [ ] Set up environment variables
-- [ ] Configure CORS if needed
-- [ ] Test in production environment
-- [ ] Set up error monitoring
-- [ ] Create backup of Service Account credentials
-- [ ] Document deployment process
+- [ ] Add service-account-key.json to .gitignore
 
 ---
 
 ## Next Steps After Setup
 
-1. Complete Google Sheets setup (follow `GOOGLE_SHEETS_SETUP_GUIDE.md`)
-2. Share Sheet ID and Sheet Name
-3. Confirm authentication method preference
-4. Begin code implementation
-5. Test each phase independently
-6. Deploy to production
+1. Complete Google Sheets setup
+2. Share Sheet ID and Sheet Name with Service Account
+3. Begin code implementation
+4. Test each phase independently
+5. Run the application locally
 
 

@@ -13,11 +13,8 @@ const GOOGLE_SHEET_NAME = 'Form Responses';
 const GOOGLE_DRIVE_FOLDER_ID = '0AO4PzvJNGviNUk9PVA';
 
 // Backend API Configuration
-// Backend server URL - update if running on different port or domain
+// Backend server URL for local development
 const BACKEND_API_URL = 'http://localhost:3000/api';
-
-// For production, update to your deployed backend URL:
-// const BACKEND_API_URL = 'https://your-backend-domain.com/api';
 
 // Submission ID Configuration
 const SUBMISSION_ID_PREFIX = 'K8PC';

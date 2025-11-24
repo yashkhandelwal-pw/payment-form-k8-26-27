@@ -152,12 +152,11 @@ The GitHub Actions workflow currently:
    npx http-server -p 8000 -c-1
    ```
 
-### Option B: Automated Deployment (Advanced)
+### Note on Deployment
 
-For automated deployment, you can extend the workflow to:
-- Deploy to Vercel/Netlify (frontend)
-- Deploy to Railway/Render/Heroku (backend)
-- Use SSH to deploy to your own server
+This application is currently configured for **local development only**. 
+- No automated deployment is set up
+- See `DEPLOYMENT.md` for more information
 
 ---
 
