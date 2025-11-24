@@ -1,0 +1,26 @@
+=====================================
+  PAYMENT FORM - LOCALHOST URLs
+=====================================
+
+MAIN APPLICATION:
+http://localhost:8000
+
+BACKEND API:
+http://localhost:3000
+
+HEALTH CHECK:
+http://localhost:3000/api/health
+
+=====================================
+
+HOW TO START:
+1. Double-click: START_SERVERS.bat
+2. Wait 5 seconds
+3. Open: http://localhost:8000
+
+=====================================
+
+ENJOY YOUR PAYMENT FORM! 🎉
+
+=====================================
+
