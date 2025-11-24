@@ -1,0 +1,40 @@
+🚀 HOW TO START THE APPLICATION
+
+═══════════════════════════════════════════
+STEP 1: START BACKEND
+═══════════════════════════════════════════
+
+Open PowerShell/Terminal and run:
+
+cd "D:\Payment Form Web App\payment-form-k8-26-27\backend"
+node server.js
+
+Wait for: "Payment Form API server running on port 3000"
+
+═══════════════════════════════════════════
+STEP 2: START FRONTEND (NEW TERMINAL)
+═══════════════════════════════════════════
+
+Open a NEW PowerShell/Terminal and run:
+
+cd "D:\Payment Form Web App\payment-form-k8-26-27"
+npx http-server -p 8000 -c-1
+
+Wait for: "Available on: http://127.0.0.1:8000"
+
+═══════════════════════════════════════════
+STEP 3: OPEN IN BROWSER
+═══════════════════════════════════════════
+
+Go to: http://localhost:8000
+
+⚠️ DO NOT double-click index.html!
+⚠️ MUST use http://localhost:8000
+
+═══════════════════════════════════════════
+
+✅ Backend: http://localhost:3000
+✅ Frontend: http://localhost:8000
+✅ All files are intact and working!
+
+
