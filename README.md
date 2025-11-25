@@ -1,91 +1,83 @@
 # Payment Form - K8 26-27
 
-Secure payment form application for Sales team members.
+A modern, responsive payment form application for managing customer payment submissions.
 
-## Quick Start
+## 🌐 Live Application
 
-### 1. Start Servers
+**GitHub Pages:** [https://yashkhandelwal-pw.github.io/payment-form-k8-26-27/](https://yashkhandelwal-pw.github.io/payment-form-k8-26-27/)
 
-```bash
-# Windows:
-START_SERVERS.bat
+---
 
-# OR Manually:
-# Terminal 1 - Backend:
-cd backend
-npm install
-node server.js
+## ✨ Features
 
-# Terminal 2 - Frontend:
-npx http-server -p 8000
-```
+- **Employee Authentication** - Secure login with email validation
+- **Role-Based Access** - Program Team sees all customers, Sales/ZM see filtered customers
+- **Customer Management** - Auto-populated customer details
+- **Payment Processing** - Support for multiple payment modes (Online, Cheque)
+- **File Upload** - Payment confirmation and deposit receipt uploads
+- **Real-time Validation** - Form validation with error messages
+- **Responsive Design** - Works on desktop, tablet, and mobile devices
 
-### 2. Open Application
+---
 
-```
-http://localhost:8000
-```
+## 🛠️ Technology Stack
 
-## Configuration
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
+- **Backend:** Supabase (Database + Storage)
+- **Styling:** Custom CSS with modern design
+- **Libraries:** 
+  - Supabase JS Client
+  - Flatpickr (Date Picker)
+  - Browser Image Compression
 
-### Backend Environment Variables
+---
 
-Edit `backend/server.js` or create `.env` file to configure:
-- Supabase credentials
-- Google Sheet ID
-- Google Drive Folder ID
-- Service account key location
+## 📊 Database Structure
 
-### Frontend Configuration
+### Tables Used:
+1. **emp_record** - Employee authentication and details
+2. **order_form_k8_25_26** - Customer and order information
+3. **payment_submissions** - Payment form submissions
 
-Edit `config.js` to set:
-- Backend API URL (default: http://localhost:3000/api)
+### Storage:
+- **payment_reciepts** - Stores payment confirmation and deposit receipt files
 
-## Security
+---
 
-✅ **Secure Architecture:**
-- All credentials stored in backend
-- Frontend has no direct database access
-- All requests validated by backend
-- Service account key hidden from users
+## 🚀 Quick Start
 
-## Requirements
+1. Visit the live application URL
+2. Enter your registered email address
+3. Select customer from dropdown
+4. Fill in payment details
+5. Upload required documents
+6. Submit the form
 
-- Node.js 16+
-- npm
-- Service account key file (place in `backend/service-account-key.json`)
+---
 
-## File Structure
+## 👥 User Roles
 
-```
-payment-form-k8-26-27/
-├── index.html              # Main application
-├── app.js                  # Frontend logic
-├── styles.css              # Styling
-├── config.js               # Frontend config (backend URL only)
-├── backend/
-│   ├── server.js           # Backend API
-│   ├── package.json        # Dependencies
-│   └── service-account-key.json  # Google credentials
-└── START_SERVERS.bat       # Start script
-```
+### Program Team
+- Full access to all customers
+- Can submit payments for any customer
 
-## Features
+### Sales / Zonal Manager
+- Access to assigned customers only
+- Filtered by zonal manager email mapping
 
-- ✅ Email authentication
-- ✅ Auto-populated customer data
-- ✅ Payment form with file uploads
-- ✅ Google Sheets integration
-- ✅ Google Drive file storage
-- ✅ Auto-incrementing submission IDs
-- ✅ Indian currency formatting
-- ✅ Mobile responsive
-- ✅ Beautiful light theme UI
+---
 
-## Support
+## 📧 Support
 
-For issues, check browser console (F12) for error messages.
+For any issues or queries, please contact the administrator.
 
-## About
+---
 
-Payment Form for K8 26-27 Sales Team
+## 📝 Version
+
+**Current Version:** 1.0.0  
+**Last Updated:** November 2024
+
+---
+
+© 2024 Payment Form K8 26-27. All rights reserved.

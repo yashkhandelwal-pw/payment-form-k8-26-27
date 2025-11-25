@@ -124,9 +124,10 @@ async function authenticateEmployee() {
             return false;
         }
 
-        if (data.team !== 'Sales') {
-            console.log('Team is not Sales');
-            showError('emailError', 'Access denied. This form is only for Sales team members.');
+        // Allow Sales and Program Team
+        if (data.team !== 'Sales' && data.team !== 'Program Team') {
+            console.log('Team is not Sales or Program Team');
+            showError('emailError', 'Access denied. This form is only for Sales and Program Team members.');
             showLoading(false);
             return false;
         }
@@ -135,6 +136,11 @@ async function authenticateEmployee() {
 
         // Authentication successful
         currentUserEmail = email;
+        window.currentUserTeam = data.team; // Store team for customer filtering
+        window.currentUserZonalManager = data.zonal_manager_email || ''; // Store ZM email
+        
+        console.log('Stored user team:', window.currentUserTeam);
+        console.log('Stored zonal_manager_email:', window.currentUserZonalManager);
         
         if (loggedInEmail) {
             loggedInEmail.textContent = email;
@@ -223,7 +229,7 @@ async function authenticateEmployee() {
     console.log('=== authenticateEmployee END (SUCCESS) ===');
 }
 
-// Load Customers based on ZM
+// Load Customers based on Team (Program Team or ZM)
 async function loadCustomers() {
     try {
         showLoading(true);
@@ -236,43 +242,60 @@ async function loadCustomers() {
             throw new Error('User email not set');
         }
 
-        // First, find the employee's RM and ZM email
-        const { data: employeeData, error: empError } = await supabase
-            .from('order_form_k8_25_26')
-            .select('rm_email_id, zm_email_id')
-            .eq('employee_email_id', currentUserEmail)
-            .limit(1)
-            .maybeSingle();
-
-        if (empError) {
-            console.error('Error finding employee ZM:', empError);
-            throw new Error('Error finding employee record: ' + empError.message);
-        }
-
-        if (!employeeData || !employeeData.zm_email_id) {
-            const errorMsg = 'Employee record not found in order_form_k8_25_26 table. Please contact administrator.';
-            console.error('Employee ZM not found for email:', currentUserEmail);
-            showError('emailError', errorMsg);
-            showLoading(false);
-            return false;
-        }
-
-        currentUserZM = employeeData.zm_email_id || '';
-        // Store RM email ID for submission (will be sent to backend)
-        window.currentUserRM = employeeData.rm_email_id || '';
+        let customers;
         
-        console.log('Stored RM Email ID:', window.currentUserRM);
-        console.log('Stored ZM Email ID:', currentUserZM);
+        // Check if user is from Program Team
+        if (window.currentUserTeam === 'Program Team') {
+            console.log('🎯 Program Team user - fetching ALL customers');
+            
+            // Get ALL unique customers from order table
+            const { data: allCustomers, error: custError } = await supabase
+                .from('order_form_k8_25_26')
+                .select('customer_code_name, customer_code, company_trade_name, customer_email, contact_number, rm_email_id, zm_email_id');
 
-        // Get all customers for this ZM (also fetch rm_email_id and zm_email_id for submission)
-        const { data: customers, error: custError } = await supabase
-            .from('order_form_k8_25_26')
-            .select('customer_code_name, customer_code, company_trade_name, customer_email, contact_number, rm_email_id, zm_email_id')
-            .eq('zm_email_id', currentUserZM);
+            if (custError) {
+                console.error('Error loading customers:', custError);
+                throw new Error('Error loading customers: ' + custError.message);
+            }
+            
+            customers = allCustomers;
+            console.log(`✅ Loaded ${customers?.length || 0} total customers for Program Team`);
+            
+        } else {
+            // For Sales/ZM - filter by zonal_manager_email
+            console.log('🎯 Sales/ZM user - filtering by zonal_manager_email');
+            
+            const zonalManagerEmail = window.currentUserZonalManager;
+            console.log('Using zonal_manager_email:', zonalManagerEmail);
+            
+            if (!zonalManagerEmail) {
+                console.warn('⚠️ No zonal_manager_email found, showing all customers as fallback');
+                // Fallback: show all customers if no ZM email
+                const { data: allCustomers, error: custError } = await supabase
+                    .from('order_form_k8_25_26')
+                    .select('customer_code_name, customer_code, company_trade_name, customer_email, contact_number, rm_email_id, zm_email_id');
 
-        if (custError) {
-            console.error('Error loading customers:', custError);
-            throw new Error('Error loading customers: ' + custError.message);
+                if (custError) {
+                    console.error('Error loading customers:', custError);
+                    throw new Error('Error loading customers: ' + custError.message);
+                }
+                
+                customers = allCustomers;
+            } else {
+                // Filter by zm_email_id matching the user's zonal_manager_email
+                const { data: filteredCustomers, error: custError } = await supabase
+                    .from('order_form_k8_25_26')
+                    .select('customer_code_name, customer_code, company_trade_name, customer_email, contact_number, rm_email_id, zm_email_id')
+                    .eq('zm_email_id', zonalManagerEmail);
+
+                if (custError) {
+                    console.error('Error loading customers:', custError);
+                    throw new Error('Error loading customers: ' + custError.message);
+                }
+                
+                customers = filteredCustomers;
+                console.log(`✅ Loaded ${customers?.length || 0} customers for ZM: ${zonalManagerEmail}`);
+            }
         }
 
         // Get unique customer names
@@ -332,6 +355,15 @@ function handleCustomerSelection() {
         document.getElementById('companyTradeName').value = customer.company_trade_name || '';
         document.getElementById('customerEmail').value = customer.customer_email || '';
         document.getElementById('contactNumber').value = customer.contact_number || '';
+        
+        // Store RM and ZM email IDs from the selected customer
+        window.currentUserRM = customer.rm_email_id || '';
+        window.currentUserZM = customer.zm_email_id || '';
+        currentUserZM = customer.zm_email_id || '';
+        
+        console.log('📧 Selected customer RM Email:', window.currentUserRM);
+        console.log('📧 Selected customer ZM Email:', window.currentUserZM);
+        
         clearError('customerError');
     } else {
         // Clear fields
@@ -339,6 +371,9 @@ function handleCustomerSelection() {
         document.getElementById('companyTradeName').value = '';
         document.getElementById('customerEmail').value = '';
         document.getElementById('contactNumber').value = '';
+        window.currentUserRM = '';
+        window.currentUserZM = '';
+        currentUserZM = '';
     }
 }
 
@@ -392,6 +427,14 @@ async function compressImage(file) {
     }
 
     try {
+        // Check if compression library is available
+        const compress = window.imageCompression || window.browserImageCompression;
+        
+        if (!compress) {
+            console.warn('Image compression library not loaded, using original file');
+            return file;
+        }
+
         const options = {
             maxSizeMB: IMAGE_COMPRESSION_OPTIONS.maxSizeMB,
             maxWidthOrHeight: IMAGE_COMPRESSION_OPTIONS.maxWidthOrHeight,
@@ -399,7 +442,8 @@ async function compressImage(file) {
             fileType: file.type.startsWith('image/') ? file.type : 'image/jpeg'
         };
 
-        const compressedFile = await imageCompression(file, options);
+        const compressedFile = await compress(file, options);
+        console.log('✅ Image compressed:', file.size, '→', compressedFile.size);
         return compressedFile;
     } catch (error) {
         console.error('Image compression error:', error);
@@ -407,102 +451,131 @@ async function compressImage(file) {
     }
 }
 
-// Upload File to Google Drive via Backend API
-async function uploadToGoogleDrive(file, fileName) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', fileName);
-    formData.append('folderId', GOOGLE_DRIVE_FOLDER_ID);
-
+// Upload File to Supabase Storage
+async function uploadToSupabaseStorage(file, fileName, submissionId) {
     try {
-        const response = await fetch(`${BACKEND_API_URL}/upload`, {
-            method: 'POST',
-            body: formData
-        });
+        console.log('📤 Uploading to Supabase Storage:', fileName);
+        
+        // Create unique file path: {submission_id}/{filename}
+        const filePath = `${submissionId}/${fileName}`;
+        
+        // Upload to Supabase Storage bucket
+        const { data, error } = await supabase.storage
+            .from('payment_reciepts')
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
 
-        if (!response.ok) {
-            const error = await response.json();
+        if (error) {
+            console.error('Supabase Storage upload error:', error);
             throw new Error(error.message || 'Upload failed');
         }
 
-        const result = await response.json();
-        return result.fileUrl || result.webViewLink;
+        // Get public URL
+        const { data: publicUrlData } = supabase.storage
+            .from('payment_reciepts')
+            .getPublicUrl(filePath);
+
+        console.log('✅ Upload successful:', publicUrlData.publicUrl);
+        return publicUrlData.publicUrl;
+        
     } catch (error) {
-        console.error('Drive upload error:', error);
+        console.error('Storage upload error:', error);
         throw error;
     }
 }
 
-// Generate Submission ID via Backend API
+// Generate Submission ID from Supabase Table
 async function generateSubmissionID() {
     try {
-        const response = await fetch(`${BACKEND_API_URL}/generate-submission-id`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                sheetId: GOOGLE_SHEET_ID,
-                sheetName: GOOGLE_SHEET_NAME,
-                prefix: SUBMISSION_ID_PREFIX,
-                startNumber: SUBMISSION_ID_START
-            })
-        });
+        console.log('🔢 Generating submission ID from Supabase...');
+        
+        // Get the last submission ID from payment_submissions table
+        const { data, error } = await supabase
+            .from('payment_submissions')
+            .select('submission_id')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-        if (!response.ok) {
-            throw new Error('Failed to generate submission ID');
+        if (error) {
+            console.error('Error querying submission ID:', error);
+            throw error;
         }
 
-        const result = await response.json();
-        return result.submissionID;
+        let newNumber = 1;
+        
+        if (data && data.submission_id) {
+            // Extract number from last ID (e.g., "K8PC00005" → 5)
+            const lastId = data.submission_id;
+            const match = lastId.match(/\d+$/);
+            if (match) {
+                newNumber = parseInt(match[0]) + 1;
+            }
+            console.log('Last submission ID:', lastId, '→ Next number:', newNumber);
+        } else {
+            console.log('No previous submissions, starting from 1');
+        }
+
+        // Generate new ID with 5-digit padding (e.g., "K8PC00006")
+        const submissionID = `${SUBMISSION_ID_PREFIX}${String(newNumber).padStart(5, '0')}`;
+        console.log('✅ Generated submission ID:', submissionID);
+        
+        return submissionID;
+        
     } catch (error) {
         console.error('Error generating submission ID:', error);
         // Fallback: Use timestamp-based ID
         const timestamp = Date.now();
-        return `${SUBMISSION_ID_PREFIX}${String(timestamp).slice(-5)}`;
+        const fallbackID = `${SUBMISSION_ID_PREFIX}${String(timestamp).slice(-5)}`;
+        console.log('⚠️ Using fallback ID:', fallbackID);
+        return fallbackID;
     }
 }
 
-// Submit Form to Google Sheets via Backend API
-async function submitToGoogleSheets(formData) {
+// Submit Form to Supabase Table
+async function submitToSupabase(formData) {
     try {
-        const response = await fetch(`${BACKEND_API_URL}/submit`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                sheetId: GOOGLE_SHEET_ID,
-                sheetName: GOOGLE_SHEET_NAME,
-                data: {
-                    timestamp: new Date().toISOString(), // Will be formatted in backend
-                    submissionID: formData.submissionID, // B: Submission ID
-                    employeeEmail: formData.employeeEmail, // C: Employee Email
-                    rmEmailID: formData.rmEmailID || '', // D: RM Email ID
-                    zmEmailID: formData.zmEmailID || '', // E: ZM Email ID
-                    customerCode: formData.customerCode, // F: Customer Code
-                    companyTradeName: formData.companyTradeName, // G: Company Trade Name
-                    customerEmail: formData.customerEmail, // H: Customer Email ID
-                    contactNumber: formData.contactNumber, // I: Customer Contact Number
-                    modeOfPayment: formData.modeOfPayment, // J: Mode of Payment
-                    dateOfPayment: formData.dateOfPayment, // K: Date of Payment
-                    paymentRefNumber: formData.paymentRefNumber, // L: Payment Reference Number
-                    paymentAmount: formData.paymentAmount, // M: Payment Amount
-                    remarks: formData.remarks || '', // N: Remarks
-                    paymentConfirmationURL: formData.paymentConfirmationURL || '', // O: Payment Confirmation File URL
-                    depositReceiptURL: formData.depositReceiptURL || '' // P: Deposit Receipt File URL
-                }
-            })
-        });
+        console.log('💾 Submitting to Supabase table...');
+        
+        // Prepare data for insertion
+        const submissionData = {
+            submission_id: formData.submissionID,
+            employee_email: formData.employeeEmail,
+            rm_email: formData.rmEmailID || '',
+            zm_email: formData.zmEmailID || '',
+            customer_code: formData.customerCode,
+            customer_name: formData.companyTradeName,
+            customer_email: formData.customerEmail,
+            contact_number: formData.contactNumber,
+            mode_of_payment: formData.modeOfPayment,
+            date_of_payment: formData.dateOfPayment,
+            amount: parseFloat(formData.paymentAmount),
+            transaction_number: formData.paymentRefNumber || '',
+            deposit_receipt_number: formData.remarks || '',
+            payment_confirmation_url: formData.paymentConfirmationURL || '',
+            deposit_receipt_url: formData.depositReceiptURL || ''
+        };
 
-        if (!response.ok) {
-            const error = await response.json();
+        console.log('Submission data:', submissionData);
+
+        // Insert into payment_submissions table
+        const { data, error } = await supabase
+            .from('payment_submissions')
+            .insert([submissionData])
+            .select();
+
+        if (error) {
+            console.error('Supabase insert error:', error);
             throw new Error(error.message || 'Submission failed');
         }
 
-        return await response.json();
+        console.log('✅ Successfully submitted to Supabase:', data);
+        return { success: true, data };
+        
     } catch (error) {
-        console.error('Sheets submission error:', error);
+        console.error('Supabase submission error:', error);
         throw error;
     }
 }
@@ -613,16 +686,16 @@ async function handleFormSubmit(e) {
         const paymentFile = paymentConfirmationFile.files[0];
         if (paymentFile) {
             const compressedFile = await compressImage(paymentFile);
-            const fileName = `${submissionID}_payment_confirmation.${compressedFile.name.split('.').pop()}`;
-            paymentConfirmationURL = await uploadToGoogleDrive(compressedFile, fileName);
+            const fileName = `payment_confirmation_${Date.now()}.${compressedFile.name.split('.').pop()}`;
+            paymentConfirmationURL = await uploadToSupabaseStorage(compressedFile, fileName, submissionID);
         }
 
         // Upload deposit receipt file (if Cheque)
         if (modeOfPayment.value === 'Cheque' && depositReceiptFile.files[0]) {
             const depositFile = depositReceiptFile.files[0];
             const compressedFile = await compressImage(depositFile);
-            const fileName = `${submissionID}_deposit_receipt.${compressedFile.name.split('.').pop()}`;
-            depositReceiptURL = await uploadToGoogleDrive(compressedFile, fileName);
+            const fileName = `deposit_receipt_${Date.now()}.${compressedFile.name.split('.').pop()}`;
+            depositReceiptURL = await uploadToSupabaseStorage(compressedFile, fileName, submissionID);
         }
 
         // Prepare form data
@@ -644,8 +717,8 @@ async function handleFormSubmit(e) {
             depositReceiptURL: depositReceiptURL
         };
 
-        // Submit to Google Sheets
-        await submitToGoogleSheets(formData);
+        // Submit to Supabase
+        await submitToSupabase(formData);
 
         showLoading(false);
         showToast(`Form submitted successfully! Submission ID: ${submissionID}`, 'success');
