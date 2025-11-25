@@ -46,28 +46,15 @@ let depositReceiptFile;
 let paymentConfirmationPreview;
 let depositReceiptPreview;
 
-// Initialize Date Picker - Inline (Always Visible)
+// Initialize Date Picker
 let datePicker;
 function initDatePicker() {
-    const calendarContainer = document.getElementById('inlineCalendar');
-    const hiddenInput = document.getElementById('dateOfPayment');
-    
-    if (!calendarContainer) {
-        console.error('Inline calendar container not found');
-        return;
-    }
-    
-    datePicker = flatpickr(calendarContainer, {
-        inline: true, // Always visible calendar
+    datePicker = flatpickr(dateOfPayment, {
         maxDate: 'today',
         dateFormat: 'Y-m-d',
-        onChange: function(selectedDates, dateStr, instance) {
-            // Update hidden input when date is selected
-            if (hiddenInput) {
-                hiddenInput.value = dateStr;
-                console.log('📅 Date selected:', dateStr);
-            }
-        }
+        allowInput: false,
+        clickOpens: true,
+        disableMobile: false
     });
 }
 
