@@ -15,6 +15,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
+    <!-- Top Logo Section -->
+    <div class="top-logo-section">
+        <img src="https://media.licdn.com/dms/image/v2/D560BAQExZmj2oHLrbA/company-logo_200_200/company-logo_200_200/0/1715255963145?e=1765411200&v=beta&t=al8dx6PNyAJzasdeoVjGUdDVRMKmqJ5bM_pOwYpjhgg" alt="PW Academy Logo" class="top-company-logo">
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay hidden">
         <div class="spinner"></div>
@@ -25,9 +30,6 @@
     <div id="authScreen" class="screen active">
         <div class="container">
             <div class="card">
-                <div class="logo-container">
-                    <img src="https://media.licdn.com/dms/image/v2/D560BAQExZmj2oHLrbA/company-logo_200_200/company-logo_200_200/0/1715255963145?e=1765411200&v=beta&t=al8dx6PNyAJzasdeoVjGUdDVRMKmqJ5bM_pOwYpjhgg" alt="Company Logo" class="company-logo">
-                </div>
                 <h1 class="form-title">Payment Form - K8 26-27</h1>
                 <p class="form-subtitle">Please enter your email to continue</p>
                 <div class="form-group">
@@ -49,15 +51,10 @@
     <div id="formScreen" class="screen">
         <div class="container">
             <div class="card">
-                <div class="logo-container-small">
-                    <img src="https://media.licdn.com/dms/image/v2/D560BAQExZmj2oHLrbA/company-logo_200_200/company-logo_200_200/0/1715255963145?e=1765411200&v=beta&t=al8dx6PNyAJzasdeoVjGUdDVRMKmqJ5bM_pOwYpjhgg" alt="Company Logo" class="company-logo-small">
-                </div>
-                <div class="header">
-                    <h1>Payment Form</h1>
-                    <div class="user-info">
-                        <span id="loggedInEmail"></span>
-                        <button id="logoutBtn" class="btn btn-link">Logout</button>
-                    </div>
+                <h1>Payment Form</h1>
+                <div class="logged-in-user">
+                    <span>Logged in as: <strong id="loggedInEmail"></strong></span>
+                    <button id="logoutBtn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">Logout</button>
                 </div>
 
                 <form id="paymentForm">
@@ -77,28 +74,18 @@
                     <div class="form-section">
                         <h2>Payment Details</h2>
                         
-                        <!-- Customer Code (Read-only) -->
-                        <div class="form-group">
-                            <label for="customerCode">Customer Code</label>
-                            <input type="text" id="customerCode" readonly class="readonly">
+                        <!-- Hidden Customer Fields (data still sent to backend) -->
+                        <div class="form-group hidden">
+                            <input type="text" id="customerCode" readonly>
                         </div>
-
-                        <!-- Company Trade Name (Read-only) -->
-                        <div class="form-group">
-                            <label for="companyTradeName">Company Trade Name</label>
-                            <input type="text" id="companyTradeName" readonly class="readonly">
+                        <div class="form-group hidden">
+                            <input type="text" id="companyTradeName" readonly>
                         </div>
-
-                        <!-- Customer Email ID (Read-only) -->
-                        <div class="form-group">
-                            <label for="customerEmail">Customer Email ID</label>
-                            <input type="email" id="customerEmail" readonly class="readonly">
+                        <div class="form-group hidden">
+                            <input type="email" id="customerEmail" readonly>
                         </div>
-
-                        <!-- Customer Contact Number (Read-only) -->
-                        <div class="form-group">
-                            <label for="contactNumber">Customer Contact Number</label>
-                            <input type="text" id="contactNumber" readonly class="readonly">
+                        <div class="form-group hidden">
+                            <input type="text" id="contactNumber" readonly>
                         </div>
 
                         <!-- Mode of Payment -->
@@ -113,10 +100,11 @@
                             <span class="error-message" id="modeError"></span>
                         </div>
 
-                        <!-- Date of Payment -->
+                        <!-- Date of Payment - Inline Calendar -->
                         <div class="form-group">
                             <label for="dateOfPayment">Date of Payment <span class="required">*</span></label>
-                            <input type="text" id="dateOfPayment" placeholder="Select date" required readonly>
+                            <input type="text" id="dateOfPayment" placeholder="Select date from calendar below" required readonly style="display: none;">
+                            <div id="inlineCalendar"></div>
                             <span class="error-message" id="dateError"></span>
                         </div>
 
@@ -130,22 +118,16 @@
                         <!-- Payment Amount -->
                         <div class="form-group">
                             <label for="paymentAmount">Payment Amount <span class="required">*</span></label>
-                            <input type="text" id="paymentAmount" placeholder="Enter amount" required>
+                            <input type="text" id="paymentAmount" inputmode="numeric" placeholder="Enter amount" required>
                             <span class="error-message" id="amountError"></span>
                             <small class="help-text">Amount will be formatted in Indian currency</small>
-                        </div>
-
-                        <!-- Remarks -->
-                        <div class="form-group">
-                            <label for="remarks">Remarks, If Any</label>
-                            <textarea id="remarks" rows="3" placeholder="Enter any remarks (optional)"></textarea>
                         </div>
 
                         <!-- Payment Confirmation Screenshot/Cheque Image -->
                         <div class="form-group">
                             <label for="paymentConfirmationFile">Payment Confirmation Screenshot/Cheque Image <span class="required">*</span></label>
                             <input type="file" id="paymentConfirmationFile" accept="image/*,application/pdf" capture="environment" required>
-                            <small class="help-text">You can upload image/PDF or capture directly with camera</small>
+                            <small class="help-text">Upload or capture with camera</small>
                             <div id="paymentConfirmationPreview" class="file-preview"></div>
                             <span class="error-message" id="paymentFileError"></span>
                         </div>
@@ -154,7 +136,7 @@
                         <div class="form-group hidden" id="depositReceiptGroup">
                             <label for="depositReceiptFile">Deposit Receipt Image (for Cheque only) <span class="required">*</span></label>
                             <input type="file" id="depositReceiptFile" accept="image/*,application/pdf" capture="environment">
-                            <small class="help-text">You can upload image/PDF or capture directly with camera</small>
+                            <small class="help-text">Upload or capture with camera</small>
                             <div id="depositReceiptPreview" class="file-preview"></div>
                             <span class="error-message" id="depositFileError"></span>
                         </div>
@@ -169,7 +151,19 @@
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
+    <!-- Success Modal -->
+    <div id="successModal" class="success-modal hidden">
+        <div class="success-modal-content">
+            <div class="success-modal-icon">✓</div>
+            <h2>Form Submitted Successfully!</h2>
+            <p>Your payment form has been submitted.</p>
+            <p class="submission-id" id="modalSubmissionId"></p>
+            <p style="color: var(--text-secondary); font-size: 14px;">Please save this Submission ID for your records</p>
+            <button id="closeModalBtn" class="btn btn-primary">Close</button>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages (Toast for errors) -->
     <div id="messageToast" class="toast hidden"></div>
 
     <!-- Immediate Console Test -->

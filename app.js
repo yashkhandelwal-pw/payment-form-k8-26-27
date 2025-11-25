@@ -46,13 +46,28 @@ let depositReceiptFile;
 let paymentConfirmationPreview;
 let depositReceiptPreview;
 
-// Initialize Date Picker
+// Initialize Date Picker - Inline (Always Visible)
 let datePicker;
 function initDatePicker() {
-    datePicker = flatpickr(dateOfPayment, {
+    const calendarContainer = document.getElementById('inlineCalendar');
+    const hiddenInput = document.getElementById('dateOfPayment');
+    
+    if (!calendarContainer) {
+        console.error('Inline calendar container not found');
+        return;
+    }
+    
+    datePicker = flatpickr(calendarContainer, {
+        inline: true, // Always visible calendar
         maxDate: 'today',
         dateFormat: 'Y-m-d',
-        allowInput: false
+        onChange: function(selectedDates, dateStr, instance) {
+            // Update hidden input when date is selected
+            if (hiddenInput) {
+                hiddenInput.value = dateStr;
+                console.log('📅 Date selected:', dateStr);
+            }
+        }
     });
 }
 
@@ -375,6 +390,11 @@ function handleCustomerSelection() {
         window.currentUserZM = '';
         currentUserZM = '';
     }
+    
+    // Fix for Android/Mobile: Close dropdown after selection
+    if (customerSelect) {
+        customerSelect.blur();
+    }
 }
 
 // Handle Mode of Payment Change
@@ -552,8 +572,8 @@ async function submitToSupabase(formData) {
             mode_of_payment: formData.modeOfPayment,
             date_of_payment: formData.dateOfPayment,
             amount: parseFloat(formData.paymentAmount),
-            transaction_number: formData.paymentRefNumber || '',
-            deposit_receipt_number: formData.remarks || '',
+            transaction_number: formData.paymentRefNumber || '', // Still store payment ref number
+            deposit_receipt_number: '', // Hidden from UI but stored as empty
             payment_confirmation_url: formData.paymentConfirmationURL || '',
             deposit_receipt_url: formData.depositReceiptURL || ''
         };
@@ -712,7 +732,6 @@ async function handleFormSubmit(e) {
             dateOfPayment: dateOfPayment.value,
             paymentRefNumber: document.getElementById('paymentRefNumber').value.trim(),
             paymentAmount: amount,
-            remarks: document.getElementById('remarks').value.trim(),
             paymentConfirmationURL: paymentConfirmationURL,
             depositReceiptURL: depositReceiptURL
         };
@@ -721,17 +740,9 @@ async function handleFormSubmit(e) {
         await submitToSupabase(formData);
 
         showLoading(false);
-        showToast(`Form submitted successfully! Submission ID: ${submissionID}`, 'success');
-
-        // Reset form after 2 seconds
-        setTimeout(() => {
-            paymentForm.reset();
-            customerSelect.value = '';
-            handleCustomerSelection();
-            paymentConfirmationPreview.innerHTML = '';
-            depositReceiptPreview.innerHTML = '';
-            depositReceiptGroup.classList.add('hidden');
-        }, 2000);
+        
+        // Show success modal instead of toast
+        showSuccessModal(submissionID);
 
     } catch (error) {
         console.error('Submission error:', error);
@@ -802,6 +813,56 @@ function showToast(message, type = 'success') {
     } catch (error) {
         console.error('Error in showToast:', error);
         alert(message);
+    }
+}
+
+// Show Success Modal (Centered, Persistent)
+function showSuccessModal(submissionID) {
+    try {
+        const modal = document.getElementById('successModal');
+        const modalSubmissionId = document.getElementById('modalSubmissionId');
+        
+        if (modal && modalSubmissionId) {
+            modalSubmissionId.textContent = submissionID;
+            modal.classList.remove('hidden');
+        } else {
+            // Fallback to toast
+            showToast(`Form submitted successfully! Submission ID: ${submissionID}`, 'success');
+        }
+    } catch (error) {
+        console.error('Error in showSuccessModal:', error);
+        alert(`Form submitted successfully! Submission ID: ${submissionID}`);
+    }
+}
+
+// Close Success Modal and Reset Form
+function closeSuccessModal() {
+    try {
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        
+        // Reset form
+        if (paymentForm) {
+            paymentForm.reset();
+        }
+        if (customerSelect) {
+            customerSelect.value = '';
+        }
+        handleCustomerSelection();
+        
+        if (paymentConfirmationPreview) {
+            paymentConfirmationPreview.innerHTML = '';
+        }
+        if (depositReceiptPreview) {
+            depositReceiptPreview.innerHTML = '';
+        }
+        if (depositReceiptGroup) {
+            depositReceiptGroup.classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Error in closeSuccessModal:', error);
     }
 }
 
@@ -975,6 +1036,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Logout
         if (logoutBtn) {
             logoutBtn.addEventListener('click', logout);
+        }
+        
+        // Close Success Modal
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeSuccessModal);
         }
         
         console.log('✅ Application initialized successfully');
